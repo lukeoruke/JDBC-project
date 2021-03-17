@@ -7,7 +7,12 @@ import java.util.Scanner;
  */
 
 
+//LUKES
+//DB_URL = DB_URL + "JDBC" + ";user="+ "andrew" + ";password=" + "password";
 
+
+//ADRIAN
+//DB_URL = DB_URL + "proj1" + ";user="+ "seth" + ";password=" + "password";
 public class main {
     
     //  Database credentials
@@ -51,6 +56,7 @@ public class main {
         System.out.println("7) Insert a new book");
         System.out.println("8) Insert a new publisher and update all books published by one publisher to be \n" +
                                "published by the new publisher. ");
+        System.out.println("9) Delete a book from the database");
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
         
@@ -66,7 +72,7 @@ public class main {
                 listPublishers();
                 break;
             case 4:
-                System.out.println("You chose 4");
+                listPublisherData();
                 break;
             case 5:
                 System.out.println("You chose 5");
@@ -140,8 +146,8 @@ public class main {
             stmt = conn.createStatement(); // create statement   //Execute a query
             String sql;
             
-            //CHANGE NAT TO group
-            sql = "SELECT * FROM WRITINGGROUPS WHERE GROUPNAME LIKE '%"+ group +"%'";   //gets the group name of all writing groups
+            //Nat20 Stories
+            sql = "SELECT groupName, HeadWriter, YearFormed, Subject FROM WRITINGGROUPS WHERE GROUPNAME LIKE '%"+ group +"%'";   //gets the group name of all writing groups
             ResultSet rs = stmt.executeQuery(sql);
             
             System.out.printf(displayFormat, "Group Name", "Head Writer", "Year Formed", "Subject");               //Extract data from result set
@@ -208,6 +214,65 @@ public class main {
                 //Display values
                 System.out.println((publisher));
                 counter++;
+            }
+
+            //Clean-up environment
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException se2) {
+            }// nothing we can do
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+    }
+    public static void listPublisherData(){
+        System.out.println("Displaying all data on specified publisher...");
+        Scanner in = new Scanner(System.in);
+        Connection conn = null; //initialize the connection
+        Statement stmt = null;  //initialize the statement that we're using
+        
+        System.out.println("Please enter a publisher name");
+        String publisher = in.nextLine();
+        
+        try {
+            Class.forName("org.apache.derby.jdbc.ClientDriver"); //Register JDBC driver
+            conn = DriverManager.getConnection(DB_URL);          //Open a connection
+            stmt = conn.createStatement(); // create statement   //Execute a query
+            String sql;
+            
+            //Wizards Publishing, 
+            sql = "SELECT publisherName, publisherAddress, publisherPhone, publisherEmail FROM Publishers where PUBLISHERNAME LIKE '%"+ publisher +"%'";   //gets the group name of all writing groups
+            ResultSet rs = stmt.executeQuery(sql);
+            
+            System.out.printf(displayFormat, "Publisher Name", "Publisher Address", "Publisher Phone", "Publisher Email");               //Extract data from result set
+            while (rs.next()) {
+                //Retrieve by column name
+                String publisherName = rs.getString("publisherName");
+                String address = rs.getString("publisherAddress");
+                String phone = rs.getString("publisherPhone");
+                String email = rs.getString("publisherEmail");
+                //Display values
+                System.out.printf(displayFormat,
+                        dispNull(publisherName), dispNull(address), dispNull(phone), dispNull(email));
             }
 
             //Clean-up environment
