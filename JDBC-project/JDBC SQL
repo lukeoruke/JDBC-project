@@ -1,0 +1,140 @@
+--the Writing Groups table holds all relevant information for a writing group
+--a writing group consists of 1+ authors but in our table we only record the head author
+--the primary key, GroupName, uniquely identifies a writing group and copies into the Books table
+CREATE TABLE WritingGroups
+(
+    --groupname is pk for this table
+    GroupName       VARCHAR(50) NOT NULL,
+    HeadWriter      VARCHAR(50),    --Headwriter column is the name of the main writer for a particular writing group
+    YearFormed      INT,        --what year the group formed
+    Subject         VARCHAR(50),    --genre of books this group makes
+    CONSTRAINT pk_WritingGroups PRIMARY KEY (GroupName)
+);
+
+--The books table hold information about a particular book in our DB
+--it tells us the book title, year published and number of pages, as well as
+--the groupname that wrote it and the publisher name that published it
+--both the groupname and publisher name are foreign keys
+CREATE TABLE Books
+(
+      GroupName         VARCHAR(50) NOT NULL,   --FK from writing group table
+      BookTitle         VARCHAR(50) NOT NULL,   --title of a particular book
+      PublisherName     VARCHAR(50) NOT NULL,   --name of publisher of book, FK from Publishers table
+      YearPublished     INT,                    --year the book was published
+      NumberPages       INT,                    --number of pages in a book
+    CONSTRAINT Books_WritingGroups_fk FOREIGN KEY (GroupName)
+        REFERENCES WritingGroups(GroupName),
+ CONSTRAINT Books_Publishers_fk FOREIGN KEY(PublisherName)
+      REFERENCES Publishers(PublisherName),
+      CONSTRAINT pk_Books PRIMARY KEY(GroupName, BookTitle)   
+);
+
+--the publishers table holds all information about Publishing houses of the books
+--in our database
+--we need to know their name, address, phone, and email, but just their name
+--is enough to uniquely identify them
+CREATE TABLE Publishers
+(
+    PublisherName       VARCHAR(50) NOT NULL, --publishing house name, PK for this table
+    PublisherAddress    VARCHAR(50),        --address of publishers
+    PublisherPhone      VARCHAR(20),        --publishers contact phone number
+    PublisherEmail      VARCHAR(50),        --publishers email
+    CONSTRAINT pk_Publishers PRIMARY KEY(PublisherName)
+);
+
+INSERT INTO WritingGroups (GroupName, HeadWriter, YearFormed, Subject)
+    VALUES  ('The Ampersands','Jane Austen',2000,'Classic'),
+            ('Writers Collective','James Pottersby',2000,'Fiction'),
+            ('Ghost Bars','Drake',2000,'Poetry'),
+            ('Bio Hazards','S.E. Hilton',2000,'Non-Fiction'),
+            ('Spacetime Crew','Isaac Asimov',2000,'Science Fiction'),
+            ('Nat20 Stories','Gary Gygax',1980,'Gaming Modules'),
+            ('Creative Collab','Jean-Eric Rhyters',2000,'Novels'),
+            ('Gang of Fiction', 'Erichard Gammahelm and Raljean Vissides',1994,'Fiction');
+
+INSERT INTO Publishers(PublisherName, PublisherAddress, PublisherPhone, PublisherEmail)
+    VALUES  ('Penguin House','818 Arctic Blvd','+8 84 646 991','PenguinHouse@PolarExpress.ice'),
+            ('TOR','9177 Andromeda Lane','562-414-9177','RocketMan7@rocketmail.com'),
+            ('Lost Records','123 Sunset Blvd Los Angeles CA','323-979-8414','SikBeatsXx@OGmail.com'),
+            ('Pears Education','666 Seventh Circle Ave','666-911-BURN','complaint_dept@netscape.net'),
+            ('Wizards Publishing','16 Baldurs Ave','919-888-4235','Tiamat@fireball.com');
+
+
+
+INSERT INTO Books (BookTitle, PublisherName, YearPublished, NumberPages,GroupName)
+    VALUES  ('Curse of Strahd','Wizards Publishing',2016,242,'Nat20 Stories'),
+            ('Unplug that Motherboard Its Sentient!','Penguin House',2021,617,'Writers Collective'),
+            ('Pride and Prejudice','Penguin House',1813,408,'The Ampersands'),
+            ('Began Near the Foundation Now Ive Arrived','Lost Records',2013,12,'Ghost Bars'),
+            ('Genetics Analysis and Principles','Pears Education',1860,384,'Bio Hazards'),
+            ('Leviathan Wakes','TOR',2016,534,'Spacetime Crew'),
+            ('History of Coffee','Pears Education',2000,95,'Creative Collab'),
+            ('The Graveyard Book','Penguin House',2008,313,'Writers Collective'),
+            ('The Restaurant at the End of the Universe','TOR',1980,208,'Spacetime Crew'),
+            ('Tashas Cauldron of Everything','Wizards Publishing',2020,347,'Nat20 Stories'),
+            ('Decent Kid A.a.ngry City','Lost Records',2014,12,'Ghost Bars'),
+            ('Rubber Duckies and Their Uses','TOR',2000,666,'Gang of Fiction'),          
+            ('Singularity','TOR',1859,800,'The Ampersands'),
+            ('Regenerative Studies','Pears Education',1994,352,'Bio Hazards'),
+            ('Decorating Facade Factories','TOR',1998,137,'Gang of Fiction'),
+            ('How to DnD Applies to Everything','Wizards Publishing',2014,274,'Nat20 Stories'),
+            ('Irregularity','Penguin House',2007,162,'Writers Collective');
+
+SELECT * FROM Publishers;
+
+SELECT * FROM WritingGroups;
+
+SELECT * FROM Books;
+
+--Write a JDBC program to support the following functions:
+-- o List all writing groups
+SELECT GroupName FROM WRITINGGROUPS;
+
+-- o List all the data for a group specified by the user
+--we also need to scrub input so if its upper or lowercase it will still work
+SELECT * FROM WRITINGGROUPS
+    WHERE GROUPNAME LIKE '%Nat20 Stories%';/*must somehow fill in group name from user*/;
+    --WHERE GROUPNAME = 'user input';
+
+-- o List all publishers
+SELECT PUBLISHERNAME FROM PUBLISHERS;
+
+-- o List all the data for a publisher specified by the user
+SELECT * FROM PUBLISHERS 
+    WHERE PUBLISHERNAME = 'TOR';
+--  WHERE PUBLISHERNAME = 'USER_INPUT';
+
+-- o List all book titles
+SELECT BOOKTITLE FROM BOOKS;
+
+-- o List all the data for a book specified by the user
+-- ▪ Please include the information about the relevant Publisher and Writing Group in your display.
+-- ▪ Be careful to prompt them for the entire primary key(BookTitle, GroupName)
+-- we can also ask them for the candidate key... (BookTitle,PublisherName)
+SELECT * FROM BOOKS
+    WHERE BOOKTITLE = 'History of Coffee';
+    --WHERE BOOKTITLE = 'USER INPUT';
+
+
+-- o Insert a new book
+-- ▪ Be sure to recover gracefully if the user attempts to input a redundant Book.
+-- ▪ If the user gives you a bogus Publisher or Writing Group, tell them exactly what went 
+--     wrong, don’t just tell them that an error occurred.
+INSERT INTO BOOKS(GROUPNAME, BOOKTITLE, PUBLISHERNAME, YEARPUBLISHED, NUMBERPAGES)
+    VALUES ('Bio Hazards','My Time in the SQL Gulag','TOR',2020,200);
+--  VALUES ('USERINPUT',USERINPUT','and so on',2,2);
+--cant enter redundant book ..
+    
+-- o Insert a new publisher and update all books published by one publisher to be published by the new publisher.
+-- ▪ Leave the old publisher alone, just modify the books that they have published. Assume that the new publisher has bought 
+--     out the old one, so now any books published by the old publisher are now published by the new one.
+-- ▪ Be sure to recover gracefully if the user attempts to input a redundant Publisher.
+
+
+
+-- o Remove a book specified by the user
+-- ▪ Be careful to prompt them for the entire primary key.
+-- ▪ Let them know if the selected book does not exists.
+
+DELETE FROM BOOKS 
+    WHERE BOOKTITLE = 'My Time in the SQL Gulag';
